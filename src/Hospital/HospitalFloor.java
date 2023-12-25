@@ -1,5 +1,7 @@
 package Hospital;
 
+import Hospital.Staff.HospitalStaff;
+
 import java.util.List;
 public class HospitalFloor {
     private final int floorNumber;
