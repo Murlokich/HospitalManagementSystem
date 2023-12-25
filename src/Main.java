@@ -1,5 +1,7 @@
+import Hospital.Hospital;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        Hospital saintPetersHospital = new Hospital("Saint Peters", "Saint avenue 15", null);
     }
 }
