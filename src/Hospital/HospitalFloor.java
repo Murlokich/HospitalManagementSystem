@@ -3,25 +3,17 @@ package Hospital;
 import Hospital.Staff.HospitalStaff;
 
 import java.util.List;
-public class HospitalFloor {
+public class HospitalFloor extends HospitalizationSpace {
     private final int floorNumber;
-    private final int capacity;
-    private int freeBeds;
     private final List<HospitalStaff> staff;
     private final List<HospitalRoom> rooms;
 
     public int getFloorNumber() {
         return floorNumber;
     }
-    public int getCapacity() {
-        return capacity;
-    }
 
-    public int getFreeBeds() {
-        return freeBeds;
-    }
-
-    public int calculateCapacity() {
+    @Override
+    protected int calculateCapacity() {
         int capacity = 0;
         for (HospitalRoom room: rooms) {
             capacity += room.getCapacity();
@@ -32,8 +24,6 @@ public class HospitalFloor {
     public HospitalFloor(int floorNumber, List<HospitalRoom> rooms, List<HospitalStaff> staff) {
         this.floorNumber = floorNumber;
         this.rooms = rooms;
-        this.capacity = calculateCapacity();
-        this.freeBeds = capacity;
         this.staff = staff;
     }
 }

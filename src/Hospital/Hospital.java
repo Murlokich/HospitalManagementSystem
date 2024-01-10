@@ -1,10 +1,8 @@
 package Hospital;
 
 import java.util.List;
-public final class Hospital {
+public final class Hospital extends HospitalizationSpace {
    private final String name, address;
-   private final int capacity;
-   private int freeBeds;
    private final List<HospitalFloor> floors;
 
     public String getName() {
@@ -15,9 +13,7 @@ public final class Hospital {
         return address;
     }
 
-    public int getCapacity() {
-        return capacity;
-    }
+
 
     public int getNumberOfFloors() {
         return floors.size();
@@ -28,11 +24,8 @@ public final class Hospital {
         return floors.get(floor);
     }
 
-    public int getFreeBeds() {
-        return freeBeds;
-    }
-
-    public int calculateCapacity() {
+    @Override
+    protected int calculateCapacity() {
         int capacity = 0;
         for (HospitalFloor floor : floors) {
             capacity += floor.getCapacity();
@@ -40,11 +33,17 @@ public final class Hospital {
         return capacity;
     }
 
+    public Hospital(String name, String address, List<HospitalFloor> floors,
+                    int availableBeds) {
+        super(availableBeds);
+        this.name = name;
+        this.address = address;
+        this.floors = floors;
+    }
+
     public Hospital(String name, String address, List<HospitalFloor> floors) {
         this.name = name;
         this.address = address;
         this.floors = floors;
-        this.capacity = calculateCapacity();
-        this.freeBeds = capacity;
     }
 }

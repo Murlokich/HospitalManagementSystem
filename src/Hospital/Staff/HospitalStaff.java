@@ -7,14 +7,27 @@ public abstract class HospitalStaff {
     private int id;
     private String firstName, lastName;
     private LocalDate birthDate;
-    protected final String role;
-    private boolean isWorking;
-    protected abstract String setRole();
+
+    public int getId() {
+        return id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
     public HospitalStaff(String firstName, String lastName, LocalDate birthDate) {
         this.id = freeId++;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
-        setRole();
     }
 }
