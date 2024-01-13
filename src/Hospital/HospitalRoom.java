@@ -2,9 +2,10 @@ package Hospital;
 
 
 import Hospital.Patient.Patient;
-
 import java.util.ArrayList;
 import java.util.List;
+
+
 public class HospitalRoom extends HospitalizationSpace{
     private final int number;
     List<Patient> patients;
