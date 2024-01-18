@@ -1,30 +1,45 @@
-package GUI;
+package gui;
 
+import javax.swing.*;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.*;
+import hospital.RoomFilters;
+
 
 public class RoomFiltersToolBar extends JPanel {
 	
-	static final int LARGE_INVISIBLE_SPACE_HEIGHT = 40;
-	static final int SMALL_INVISIBLE_SPACE_HEIGHT = 10;
+	private static final int LARGE_INVISIBLE_SPACE_HEIGHT = 40;
+	private static final int SMALL_INVISIBLE_SPACE_HEIGHT = 10;
+	private final int FLOORS_NUMBER;
+	private final int MAX_ROOM_CAPACITY;
 	
-	static JLabel roomFiltersTitle;
-	static JLabel floorChooserLabel;
-	static JPanel floorChooser;
-	static JLabel availableBedsSwitchLabel;
-	static JComboBox<String> availableBedSwitch;
-	static JLabel roomCapacitySliderLabel;
-	static JSlider roomCapacitySlider;
-	static JButton applyButton;
+	private static final Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
+	
+	private static JLabel roomFiltersTitle;
+	private static JLabel floorChooserLabel;
+	private static JPanel floorChooser;
+	private static JLabel availableBedsSwitchLabel;
+	private static JComboBox<String> availableBedSwitch;
+	private static JLabel roomCapacitySliderLabel;
+	private static JSlider roomCapacitySlider;
+	private static JButton applyButton;
+	
+	private RoomFilters filters;
 	
 	
-	public RoomFiltersToolBar() {
+	public RoomFiltersToolBar(int floorsNumber, int maxRoomCapacity) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		
+		FLOORS_NUMBER = floorsNumber;
+		MAX_ROOM_CAPACITY = maxRoomCapacity;
+		
+		filters = new RoomFilters(getFloorNumbersArrayList(false), MAX_ROOM_CAPACITY, 
+						RoomFilters.HasAvailableBedOption.BOTH);
 		
 		addLargeInvisibleSpace();
         addLargeInvisibleSpace();
@@ -37,6 +52,8 @@ public class RoomFiltersToolBar extends JPanel {
         createRoomCapacitySliderLabel();
         createRoomCapacitySlider();
         createApplyButton();
+        
+        setBackground(BACKGROUND_COLOR);
 	}
 	
 	private void addSmallInvisibleSpace() {
@@ -70,11 +87,21 @@ public class RoomFiltersToolBar extends JPanel {
         floorChooser.setAlignmentX(Component.LEFT_ALIGNMENT);
         floorChooser.setLayout(new BoxLayout(floorChooser, BoxLayout.Y_AXIS));
         List<JCheckBox> floorCheckboxes = new ArrayList<>();
-        int[] floors = {1, 2, 3, 4, 5};
         
+        ArrayList<Integer> floors = getFloorNumbersArrayList(true);
         for (int floor: floors) {
         	JCheckBox floorBox = new JCheckBox(Integer.toString(floor));
         	floorBox.setFont(new Font("Dialog", Font.BOLD, 15));
+        	floorBox.setBackground(BACKGROUND_COLOR);
+        	floorBox.setSelected(true);
+        	floorBox.addItemListener(e -> {
+        		if (e.getStateChange() == 1) {
+        			filters.addFloor(floor - 1);  // floors array keeps numbers starting 									from 1 (not 0)
+        		}
+        		else {
+        			filters.removeFloor(floor - 1);
+        		}
+        	});
         	floorChooser.add(floorBox);
         	floorCheckboxes.add(floorBox);
         }
@@ -92,11 +119,30 @@ public class RoomFiltersToolBar extends JPanel {
     }
     
     private void createAvailableBedOptions() {
-    	String[] availableBedOptions = {"Yes", "No", "Both"};
+    	final String YES = "Yes", NO = "No", BOTH = "Both";
+    	String[] availableBedOptions = {YES, NO, BOTH};
         availableBedSwitch = new JComboBox<String>(availableBedOptions);
         availableBedSwitch.setAlignmentX(Component.LEFT_ALIGNMENT);
         availableBedSwitch.setMaximumSize(new Dimension(Integer.MAX_VALUE,
         								availableBedSwitch.getMinimumSize().height));
+        availableBedSwitch.setBackground(BACKGROUND_COLOR);
+        availableBedSwitch.addActionListener(e -> {
+        	String stringOption = availableBedSwitch.getSelectedItem().toString();
+        	System.out.println(stringOption);
+        	RoomFilters.HasAvailableBedOption option = RoomFilters.HasAvailableBedOption.BOTH;
+        	switch (stringOption) {
+        		case YES:
+        			option = RoomFilters.HasAvailableBedOption.YES;
+        			break;
+        		case NO:
+        			option = RoomFilters.HasAvailableBedOption.NO;
+        			break;
+        		case BOTH:
+        			option = RoomFilters.HasAvailableBedOption.BOTH;
+        			break;
+        	}
+        	filters.setAvailableBed(option);
+        });
         addSmallInvisibleSpace();
         add(availableBedSwitch);
     }
@@ -111,14 +157,18 @@ public class RoomFiltersToolBar extends JPanel {
     }
     
     private void createRoomCapacitySlider() {
-    	final int MAX_CAPACITY = 5, MIN_CAPACITY = 1;
-        roomCapacitySlider = new JSlider(MIN_CAPACITY, MAX_CAPACITY, MIN_CAPACITY);
+    	final int MIN_CAPACITY = 1;
+        roomCapacitySlider = new JSlider(MIN_CAPACITY, MAX_ROOM_CAPACITY, MIN_CAPACITY);
         roomCapacitySlider.setAlignmentX(Component.LEFT_ALIGNMENT);
         roomCapacitySlider.setPaintTrack(true);
         roomCapacitySlider.setPaintTicks(true);
         roomCapacitySlider.setPaintLabels(true);
         roomCapacitySlider.setMajorTickSpacing(1);
         addSmallInvisibleSpace();
+        roomCapacitySlider.setBackground(BACKGROUND_COLOR);
+        roomCapacitySlider.addChangeListener(e -> {
+        	filters.setMaxCapacity(roomCapacitySlider.getValue());
+        });
         add(roomCapacitySlider);
     }
     
@@ -126,7 +176,27 @@ public class RoomFiltersToolBar extends JPanel {
     	applyButton = new JButton("Apply");
         Dimension maxSize = new Dimension(100, 50);
         applyButton.setMaximumSize(maxSize);
-        addLargeInvisibleSpace();
+        addLargeInvisibleSpace();           
         add(applyButton);
     }
+    
+    // creates an ArrayList with consecutive numbers for all the floors
+    // if withShift is true we increase the values by 1 to start floors 
+    // from 1 instead of 0 for GUI
+	private ArrayList<Integer> getFloorNumbersArrayList(boolean withShift) { 
+		// creating a set of floor numbers for default filter settings
+		ArrayList<Integer> floors = new ArrayList<>();
+		for (int floor = 0; floor < FLOORS_NUMBER; floor++) {
+			floors.add(withShift ? floor + 1 : floor);
+		}
+		return floors;
+	}
+	
+	public JButton getApplyButton() {
+		return applyButton;
+	}
+	
+	public RoomFilters getRoomFilters() {
+		return filters;
+	}
 }

@@ -1,6 +1,7 @@
-package Hospital.Staff;
+package hospital.staff;
 
 import java.time.LocalDate;
+
 
 public abstract class HospitalStaff {
     private static int freeId = 0;

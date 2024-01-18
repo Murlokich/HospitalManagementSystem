@@ -1,4 +1,4 @@
-package Hospital.Patient;
+package hospital.patient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,12 +7,20 @@ import java.time.LocalDate;
 public class Patient {
     private static int freeId = 0;
     private final int id;
-    private final LocalDate birthDate;
+    private LocalDate birthDate = null;
     private final String firstName, lastName;
-    private final List<MedicalRecord> medicalHistory;
+    private List<MedicalRecord> medicalHistory = null;
+    private String hospitalizationReason = null;
 
-    private final int roomNumber, hospitalizationDays;
-    private final LocalDate hospitalizationDate;
+    private int roomNumber = -1, hospitalizationDays = -1;
+    private LocalDate hospitalizationDate = null;
+    
+    @Override
+    public String toString() {
+    	String res = lastName + " " + firstName + "\n\nHospitalization reason:\n" 
+    					+ hospitalizationReason + "\n" + "\n\n";
+    	return res;
+    }
 
     public int getId() {
         return id;
@@ -37,6 +45,10 @@ public class Patient {
     public int getRoomNumber() {
         return roomNumber;
     }
+    
+    public void setRoom(int roomNumber) {
+    	this.roomNumber = roomNumber;
+    }
 
     public int getHospitalizationDays() {
         return hospitalizationDays;
@@ -44,6 +56,14 @@ public class Patient {
 
     public LocalDate getHospitalizationDate() {
         return hospitalizationDate;
+    }
+    
+    public Patient(String lastName, String firstName, String hospitalizationReason, int roomNumber) {
+    	this.id = freeId++;
+    	this.firstName = firstName;
+    	this.lastName = lastName;
+    	this.hospitalizationReason = hospitalizationReason;
+    	this.roomNumber = roomNumber;
     }
 
     public Patient(LocalDate birthDate, String firstName, String lastName,
